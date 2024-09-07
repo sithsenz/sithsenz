@@ -1,5 +1,10 @@
 ## Hi there 👋
 
+|r0c1|r0c2|
+|---|---|
+|r2c1||
+|_  _|r3c2|
+
 <!--
 **sithsenz/sithsenz** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
