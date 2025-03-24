@@ -1,8 +1,19 @@
 '''
-Mula dari file ini.
-Kod dalam file ini perlu dilaksanakan setiap 3 bulan, pada hari Sabtu antara 8-14hb.
-Kod ini akan memuatturun semua laman saham dalam klsescreener.
-Data daripada laman saham ini akan diekstrak dan digunakan dalam file seterusnya.
+Muat Turun Laman Saham dari KLSEScreener dan Simpan sebagai Fail HTML.
+
+Fail ini berfungsi untuk memuat turun data laman saham daripada KLSEScreener
+dan menyimpannya sebagai fail HTML di dalam folder 'laman_saham'. Fail ini
+adalah langkah pertama dalam siri analisis data saham dan perlu dijalankan
+secara berkala (setiap 3 bulan, pada hari Sabtu antara 8-14hb).
+
+Laman saham yang dimuat turun akan digunakan dalam fail 'melombong_data.py' untuk
+analisis selanjutnya.
+
+Langkah-langkah yang dilakukan:
+1. Menghapuskan fail HTML lama dalam folder 'laman_saham'.
+2. Membaca URL daripada fail 'screener_htm/Screener.html'.
+3. Memuat turun dan menyimpan setiap laman saham sebagai fail HTML.
+4. Mencetak ringkasan jumlah laman saham yang berjaya dan bermasalah.
 '''
 
 
@@ -30,7 +41,7 @@ if __name__ == "__main__":
         jumlah_url: int = len(semua_url)
 
 # simpan semua laman.
-        for url in semua_url: pelombong.simpan_laman(url)
+        for indeks, url in enumerate(semua_url): pelombong.simpan_laman(indeks, url, jumlah_url)
 
         semua_laman_baharu: list = glob("laman_saham/*.htm")
         jumlah_laman_baharu: int = len(semua_laman_baharu)
