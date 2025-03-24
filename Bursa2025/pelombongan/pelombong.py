@@ -137,6 +137,33 @@ def dapatkan_harga(sup: BeautifulSoup) -> float:
 
 
 def dapatkan_data_eps_dps(sup: BeautifulSoup) -> list:
+    '''
+    Mengekstrak data EPS dan DPS dari objek BeautifulSoup dan mengembalikan DataFrame Pandas.
+
+    Fungsi ini mengambil objek BeautifulSoup yang mewakili laman web dengan jadual laporan
+    kewangan, mengekstrak data EPS dan DPS untuk setiap FY, dan mengembalikan data tersebut
+    dalam bentuk DataFrame Pandas.
+
+    Args:
+        sup (BeautifulSoup): Objek BeautifulSoup yang mengandungi kandungan HTML.
+
+    Returns:
+        pd.DataFrame: DataFrame Pandas yang mengandungi lajur 'fy', 'eps', dan 'dps'.
+                      Data dikumpulkan berdasarkan fy, dan nilai EPS dan DPS dijumlahkan
+                      untuk setiap tahun.
+
+    Catatan:
+        - Fungsi ini mencari jadual dengan kelas
+        "financial_reports table table-hover table-sm table-theme" dalam objek BeautifulSoup.
+        - fy diekstrak dari lajur ke-8 (indeks 7), dan 4 digit terakhir diekstrak
+        dan ditukar kepada integer.
+        - EPS diekstrak dari lajur pertama (indeks 0), dan ditukar kepada float.
+        - DPS diekstrak dari lajur ke-2 (indeks 1), dan ditukar kepada float.
+        - Data dikumpulkan berdasarkan fy, dan EPS dan DPS dijumlahkan untuk setiap tahun.
+        - Fungsi ini mengubah data dalam jadual dengan float menggunakan fungsi eval().
+    '''
+
+
     df_data: pd.DataFrame = pd.DataFrame(columns=["fy", "eps", "dps"])
 
     _jadual = sup.find("table", attrs={"class": "financial_reports table table-hover table-sm table-theme"})
