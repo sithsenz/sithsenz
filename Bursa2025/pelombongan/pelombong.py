@@ -2,9 +2,7 @@ import pandas as pd
 
 
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from playwright.sync_api import sync_playwright
 
 
 def dapatkan_semua_url(laman_screener: str) -> set:
@@ -50,38 +48,44 @@ def dapatkan_semua_url(laman_screener: str) -> set:
 
 def simpan_laman(indeks, url, jumlah_url) -> None:
     '''
-    Menyimpan sumber halaman web dari URL yang diberikan ke dalam fail HTML.
+    Menyimpan sumber halaman web dari URL yang diberikan ke dalam file HTML
+    menggunakan Playwright.
 
-    Fungsi ini mengambil URL, memuatkannya menggunakan pemandu web (driver),
-    dan menyimpan sumber halaman yang dimuatkan ke dalam fail HTML dengan nama
+    Fungsi ini mengambil URL, memuatkannya menggunakan Playwright,
+    dan menyimpan sumber halaman yang dimuatkan ke dalam file HTML dengan nama
     yang berdasarkan nombor stok yang diekstrak dari URL.
 
     Args:
         indeks (int): Indeks URL semasa dalam senarai URL yang diproses.
         url (str): URL halaman web yang akan disimpan.
-        n (int): Jumlah keseluruhan URL yang akan diproses.
+        jumlah_url (int): Jumlah keseluruhan URL yang akan diproses.
 
     Returns:
         None: Fungsi ini tidak mengembalikan nilai.
 
     Contoh:
         Jika url = "https://www.klsescreener.com/v2/stocks/view/1234/ABC",
-        maka fail yang disimpan akan bernama "1234.htm" di dalam folder "laman_saham".
+        maka file yang disimpan akan bernama "1234.htm" di dalam folder "laman_saham".
 
     Catatan:
-        Fungsi ini juga mencetak kemajuan pemprosesan ke konsol.
+        - Fungsi ini menggunakan Playwright untuk memuat dan menyimpan halaman web.
+        - Fungsi ini juga mencetak kemajuan pemprosesan ke konsol.
     '''
-    nombor_stok: str = url.split("view/")[1].split("/")[0]
-    
-    servis = Service(ChromeDriverManager().install())
-    pemandu_chrome = webdriver.Chrome(service=servis)
 
-    pemandu_chrome.get(url)
+    nombor_stok: str = url.split("view/")[1].split("/")[0]
 
     nama_file_laman: str = f'laman_saham/{nombor_stok}.htm'
 
-    with open(nama_file_laman, "w") as halaman:
-        halaman.write(pemandu_chrome.page_source)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(url=url, timeout=30000)
+        page_source = page.content()
+
+        with open(nama_file_laman, "w", encoding="utf-8") as halaman:
+            halaman.write(page_source)
+        
+        browser.close()
     
     print(f'   {indeks+1} / {jumlah_url} = {(indeks+1) / jumlah_url:.2%}', end="\r")
 
