@@ -20,11 +20,43 @@ Langkah-langkah yang dilakukan:
 import os
 
 
+from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 
 
 from modulam import pencatit_masa
 from pelombongan import pelombong
+
+
+def simpan_laman(args: tuple) -> None:
+    '''
+    Menyimpan sumber halaman web dari URL ke dalam file HTML.
+
+    Fungsi ini mengambil tuple yang mengandungi indeks dan URL, dan menggunakan
+    modul pelombong.simpan_laman untuk menyimpan sumber halaman web dari URL
+    tersebut ke dalam fail HTML. Fungsi ini direka untuk digunakan dengan
+    ThreadPoolExecutor, yang hanya menerima satu argumen.
+
+    Args:
+        args (tuple): Tuple yang mengandungi indeks (int) dan URL (str).
+
+    Returns:
+        None: Fungsi ini tidak mengembalikan nilai.
+
+    Catatan:
+        - Fungsi ini menganggpa bahawa variabel global 'jumlah_url' telah
+        ditetapkan sebelum dipanggil.
+        - Fungsi ini memanggil fungsi pelombong.simpan_laman untuk melakukan
+        operasi penyimpanan.
+
+    Contoh:
+        Jika args = (5, "https://www.klsescreener.com/v2/stocks/view/1234/ABC"),
+        fungsi ini akan memanggil
+        pelombong.simpan_laman(5, "https://www.klsescreener.com/v2/stocks/view/1234/ABC", jumlah_url).
+    '''
+
+    indeks, url = args
+    pelombong.simpan_laman(indeks, url, jumlah_url)
 
 
 if __name__ == "__main__":
@@ -41,7 +73,10 @@ if __name__ == "__main__":
         jumlah_url: int = len(semua_url)
 
 # simpan semua laman.
-        for indeks, url in enumerate(semua_url): pelombong.simpan_laman(indeks, url, jumlah_url)
+        # for indeks, url in enumerate(semua_url): pelombong.simpan_laman(indeks, url, jumlah_url)
+
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            executor.map(simpan_laman, enumerate(semua_url))
 
         semua_laman_baharu: list = glob("laman_saham/*.htm")
         jumlah_laman_baharu: int = len(semua_laman_baharu)
