@@ -14,10 +14,10 @@ Langkah-langkah utama yang dilakukan:
 4. Menghitung nilai cerun untuk EPS dan DPS menggunakan regresi linear (RANSAC).
 5. Menentukan nilai cerun akhir saham sebagai hasil darab cerun EPS dan DPS.
 6. Cerun akhir (hasil darab) hanya akan positif jika kedua-dua cerun EPS dan DPS adalah positif.
-7. Menyaring saham-saham dengan nilai cerun positif (dianggap 'bagus').
+7. Menyaring saham-saham dengan nilai cerun akhir positif (dianggap 'bagus').
 8. Mencetak kamus yang mengandungi nama saham dan kod saham untuk saham-saham 'bagus'.
 
-Kamus yang dicetak perlu disalin dan digunakan dalam file 'melatih_model_bhm.py'
+Kamus yang dicetak perlu disalin dan digunakan dalam file 'menilai_saham.py'
 untuk langkah analisis selanjutnya.
 
 Fungsi utama dalam file ini:
@@ -48,8 +48,6 @@ from pelombongan import pelombong
 tahun_ini: int = eval(input("   Tahun ini = "))
 
 semua_laman: list = glob("laman_saham/*.htm")
-
-df_saham: pd.DataFrame = pd.DataFrame(columns=["nama", "kod", "cerun"])
 
 
 def utama(laman):
@@ -90,6 +88,7 @@ def utama(laman):
     sup: BeautifulSoup = BeautifulSoup(kandungan, "html.parser")
 
     nama, kod = pelombong.dapatkan_nama_saham(sup)
+    kod = f'{kod}.KL'
     df: pd.DataFrame = pelombong.dapatkan_data_eps_dps(sup)
 
     df = df.drop(axis="index", index=df[df["fy"] >= tahun_ini].index).copy()
@@ -105,7 +104,7 @@ def utama(laman):
         
     cerun: float = cerun_eps * cerun_dps
 
-    saham: tuple = (nama, kod, cerun)
+    saham: tuple = (kod, nama, cerun)
 
     return saham
 
@@ -114,11 +113,11 @@ if __name__ == "__main__":
     with Pool() as p:
         semua_saham: list = p.map(utama, semua_laman)
     
-    saham_bagus: dict = {nama: kod for nama, kod, cerun in semua_saham if cerun > 0}
+    saham_bagus: dict = {kod: nama for kod, nama, cerun in semua_saham if cerun > 0}
     bil_saham_bagus: int = len(saham_bagus)
 
     print(f'''
 Terdapat {bil_saham_bagus} saham yang bagus seperti berikut:
 {saham_bagus}
-Salin kamus saham yang bagus di atas ke dalam file melatih_model_bhm.py .
+Salin kamus saham yang bagus di atas ke dalam file menilai_saham.py .
     ''')

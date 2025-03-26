@@ -2,6 +2,7 @@ import pandas as pd
 
 
 from bs4 import BeautifulSoup
+from glob import glob
 from playwright.sync_api import sync_playwright
 
 
@@ -46,19 +47,16 @@ def dapatkan_semua_url(laman_screener: str) -> set:
     return semua_url_yang_unik
 
 
-def simpan_laman(indeks, url, jumlah_url) -> None:
+def simpan_laman(url) -> None:
     '''
-    Menyimpan sumber halaman web dari URL yang diberikan ke dalam file HTML
-    menggunakan Playwright.
+    Menyimpan sumber halaman web dari URL yang diberikan ke dalam file HTML menggunakan Playwright.
 
-    Fungsi ini mengambil URL, memuatkannya menggunakan Playwright,
-    dan menyimpan sumber halaman yang dimuatkan ke dalam file HTML dengan nama
-    yang berdasarkan nombor stok yang diekstrak dari URL.
+    Fungsi ini mengambil URL, memuatkannya menggunakan Playwright, dan menyimpan sumber
+    halaman yang dimuatkan ke dalam file HTML dengan nama yang berdasarkan nombor stok
+    yang diekstrak dari URL. Fungsi ini juga mencetak kemajuan penyimpanan ke konsol.
 
     Args:
-        indeks (int): Indeks URL semasa dalam senarai URL yang diproses.
         url (str): URL halaman web yang akan disimpan.
-        jumlah_url (int): Jumlah keseluruhan URL yang akan diproses.
 
     Returns:
         None: Fungsi ini tidak mengembalikan nilai.
@@ -69,8 +67,13 @@ def simpan_laman(indeks, url, jumlah_url) -> None:
 
     Catatan:
         - Fungsi ini menggunakan Playwright untuk memuat dan menyimpan halaman web.
-        - Fungsi ini juga mencetak kemajuan pemprosesan ke konsol.
+        - Fungsi ini memanggil fungsi 'dapatkan_semua_url' untuk mendapatkan daftar semua URL.
+        - Fungsi ini mencetak kemajuan penyimpanan ke konsol dalam bentuk peratusan.
     '''
+
+    semua_url: set = dapatkan_semua_url("screener_htm/Screener.html")
+    
+    jumlah_url: int = len(semua_url)
 
     nombor_stok: str = url.split("view/")[1].split("/")[0]
 
@@ -87,7 +90,10 @@ def simpan_laman(indeks, url, jumlah_url) -> None:
         
         browser.close()
     
-    print(f'   {indeks+1} / {jumlah_url} = {(indeks+1) / jumlah_url:.2%}', end="\r")
+    bil_laman: int = len(glob("laman_saham/*.htm"))
+    peratus_siap: float = bil_laman / jumlah_url
+
+    print(f'   {bil_laman} / {jumlah_url} = {peratus_siap:.2%}', end="\r")
 
 
 def dapatkan_nama_saham(sup: BeautifulSoup) -> tuple:
